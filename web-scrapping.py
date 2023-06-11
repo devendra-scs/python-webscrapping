@@ -16,56 +16,47 @@ import urllib3
 import csv
 import xlsxwriter
 
-def writeExcelRow(worksheet, count, row):
-    col=0
-    for item in row:
-        worksheet.write(count, col, item)
-        col=col+1
-    return
+BASE_URL ='https://www.sportstimingsolutions.in/share.php?event_id=56662&bib='
+OUTPUT_FILE_NAME="t.csv"
 
-def writeCSVRow(row):
-    csvWriter = csv.writer(csvFile)
+def writeCSVRow(csvWriter, row):    
     csvWriter.writerow(row)
     return
 
-def parseAndWriteResponse(soup, row, count, bibNumber):
+def parseAndWriteResponse(soup, row, csvWriter, bibNumber):
     row.clear()
-    row.insert(0,bibNumber)
+    row.insert(0, bibNumber)
     name=soup.find("h3",{"class":"txt-color img-padding"})
-    #print(name.text)
+    
     if name is  not None:
-        row.insert(1,name.text)
+        row.insert(1, name.text)
         finishedTime= soup.find("td", {"class":"text-center neww-table he"})
-        #print(finishedTime.text)
-        row.insert(2,finishedTime.text)
-        timers= soup.find_all("td", {"class":"text-center neww-table"})
-        row.insert(3,timers[0].text)
-        row.insert(4,timers[1].text)
-        row.insert(5,timers[2].text)
+        row.insert(2, finishedTime.text)
+        timers= soup.find_all("td", {"class":"text-center neww-table"})        
+        row.insert(3, timers[0].text)
+        row.insert(4, timers[1].text)
+        row.insert(5, timers[2].text)
         headers=soup.find_all("th", {"class":'text-center'})
-        row.insert(6,headers[6].text)
-        #writeExcelRow(worksheet,count,row)
-        writeCSVRow(row)
-        count=count+1
+                
+        if len(headers)>6:
+           row.insert(6, headers[6].text)
+        
+        writeCSVRow(csvWriter, row)
     return
 
-csvFile= open('tcs10k2019.csv', 'a') 
-
-# Create a workbook and add a worksheet.
-workbook = xlsxwriter.Workbook('tcsopen10k.xlsx')
-worksheet = workbook.add_worksheet('open10k')
-
+csvFile= open(OUTPUT_FILE_NAME, 'a') 
 count=0
 
 row=['BIB', 'Name', 'Finished Time', 'Chip Pace (min/km)', 'Rank Overall', "Category Rank", "Category"]
-writeExcelRow(worksheet,count,row)
-writeCSVRow(row)
-count=count+1
-bibNumber=400
+csvWriter = csv.writer(csvFile)
+writeCSVRow(csvWriter, row)
 
-while( bibNumber < 241000):
-    baseURL ='https://www.sportstimingsolutions.in/share.php?event_id=50377&bib='
-    resultURL=baseURL+str(bibNumber) 
+count=count+1
+bibNumber=11
+
+while( bibNumber < 12):
+    
+    resultURL=BASE_URL+str(bibNumber) 
     print(resultURL)
     http = urllib3.PoolManager(cert_reqs='CERT_NONE')
     urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
@@ -73,9 +64,8 @@ while( bibNumber < 241000):
     html = result.data
     if result.status == 200:
         soup = BeautifulSoup(html, "html5lib")
-        parseAndWriteResponse(soup, row, count, bibNumber)
-    bibNumber =bibNumber+1
+        parseAndWriteResponse(soup, row, csvWriter, bibNumber)
+    bibNumber = bibNumber+1
 
 csvFile.close()
-workbook.close()
 
