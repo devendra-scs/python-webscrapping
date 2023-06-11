@@ -44,7 +44,7 @@ def parseAndWriteResponse(soup, row, csvWriter, bibNumber):
         writeCSVRow(csvWriter, row)
     return
 
-csvFile= open(OUTPUT_FILE_NAME, 'a') 
+csvFile= open(OUTPUT_FILE_NAME, 'w', newline='') 
 count=0
 
 row=['BIB', 'Name', 'Finished Time', 'Chip Pace (min/km)', 'Rank Overall', "Category Rank", "Category"]
