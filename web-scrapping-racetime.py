@@ -20,10 +20,11 @@ import json
 EVENT_NAME="Shriram Properties Bengaluru Marathon 2022 October"
 EVENT_CITY="Bangalore"
 EVENT_DATE="16th October 2022"
-RESULT_URL="https://appapi.racetime.in/result/details?raceID=20b2ab6a-4ca2-4312-9813-13584f53d8bc&event=MARATHON&bibNo="
+#RACE_URL="https://appapi.racetime.in/result/details?raceID=20b2ab6a-4ca2-4312-9813-13584f53d8bc&event=MARATHON&bibNo="
+RACE_URL="https://appapi.racetime.in/result/details?raceID=20b2ab6a-4ca2-4312-9813-13584f53d8bc&event="
 EVENT_YEAR="2022"
-START_BIB_NUMBER=10
-END_BIB_NUMBER=11
+START_BIB_NUMBER=1
+END_BIB_NUMBER=500000
 
 def get_event_ID(conn, event_name):
     EventID=0
@@ -141,25 +142,39 @@ def parseAndWriteResponse(conn, event_id, json_data):
         Insert_splits_data(conn, event_id, runners_id, BIB, item['distance'], item['time'])
     return
 
-conn = sqlite3.connect('RunningData.db')
+conn = sqlite3.connect('data/RunningData.db')
 print("Inserting Event ID Details")
 event_id = insert_event_details(conn);
 bibNumber = START_BIB_NUMBER
 
 while( bibNumber < END_BIB_NUMBER):
     
-    baseURL='https://appapi.racetime.in/result/details?raceID=20b2ab6a-4ca2-4312-9813-13584f53d8bc&event=MARATHON&bibNo='
-    resultURL=baseURL +str(bibNumber)
+    resultURL=""
+    
+    if bibNumber <1000:    
+        resultURL= RACE_URL+"MARATHON+ELITE&bibNo="+str(bibNumber)
+    else:
+        if bibNumber <20000:
+            #https://appapi.racetime.in/result/details?raceID=20b2ab6a-4ca2-4312-9813-13584f53d8bc&event=TIMED+10K&bibNo=14047 
+            resultURL= RACE_URL+"TIMED+10K&bibNo="+str(bibNumber)
+        else:
+            if bibNumber <40000:
+                #https://appapi.racetime.in/result/details?raceID=20b2ab6a-4ca2-4312-9813-13584f53d8bc&event=HALF+MARATHON&bibNo=26668
+                resultURL= RACE_URL+"HALF+MARATHON&bibNo="+str(bibNumber)
+            else :
+                #https://appapi.racetime.in/result/details?raceID=20b2ab6a-4ca2-4312-9813-13584f53d8bc&event=MARATHON&bibNo=44103
+                resultURL= RACE_URL+"MARATHON&bibNo="+str(bibNumber)
+        
     print(resultURL)
     http = urllib3.PoolManager(cert_reqs='CERT_NONE')
     urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
     result = http.request('GET', resultURL)
     
     if result.status == 200:
-       json_data = result.data
-             
-       result = json.loads(json_data)
-       
+       json_data = result.data             
+       result = json.loads(json_data)       
        parseAndWriteResponse(conn, event_id, result['data'])
     
     bibNumber =bibNumber+1
+
+print("Completed successfully")
