@@ -20,11 +20,30 @@ import json
 EVENT_NAME="Shriram Properties Bengaluru Marathon 2022 October"
 EVENT_CITY="Bangalore"
 EVENT_DATE="16th October 2022"
-#RACE_URL="https://appapi.racetime.in/result/details?raceID=20b2ab6a-4ca2-4312-9813-13584f53d8bc&event=MARATHON&bibNo="
 RACE_URL="https://appapi.racetime.in/result/details?raceID=20b2ab6a-4ca2-4312-9813-13584f53d8bc&event="
 EVENT_YEAR="2022"
 START_BIB_NUMBER=1
 END_BIB_NUMBER=500000
+
+#Change url based on event category
+def get_result_url(bibNumber):
+    resultURL=""
+    if bibNumber <1000:    
+        resultURL= RACE_URL+"MARATHON+ELITE&bibNo="+str(bibNumber)
+    else:
+        if bibNumber <20000:
+            #https://appapi.racetime.in/result/details?raceID=20b2ab6a-4ca2-4312-9813-13584f53d8bc&event=TIMED+10K&bibNo=14047 
+            resultURL= RACE_URL+"TIMED+10K&bibNo="+str(bibNumber)
+        else:
+            if bibNumber <40000:
+                #https://appapi.racetime.in/result/details?raceID=20b2ab6a-4ca2-4312-9813-13584f53d8bc&event=HALF+MARATHON&bibNo=26668
+                resultURL= RACE_URL+"HALF+MARATHON&bibNo="+str(bibNumber)
+            else :
+                #https://appapi.racetime.in/result/details?raceID=20b2ab6a-4ca2-4312-9813-13584f53d8bc&event=MARATHON&bibNo=44103
+                resultURL= RACE_URL+"MARATHON&bibNo="+str(bibNumber)
+                
+    return resultURL
+                
 
 def get_event_ID(conn, event_name):
     EventID=0
@@ -113,26 +132,52 @@ def Insert_splits_data(conn, event_id, runners_id, BIB, Distance, Time):
     print("Spilits Insert SQL:",sql)    
     conn.execute(sql);
     conn.commit()
-
-
+    
     return True
 
 def parseAndWriteResponse(conn, event_id, json_data):
-    BIB= json_data['bibNo']    
-    Name = json_data['name']
-    Category = json_data['category']
-    Distance = json_data['distance']
+    BIB = ""
+    if 'bibNo' in json_data:
+        BIB = json_data['bibNo']
+    else:
+        print(" Invalid Json, Bib not found:", json_data)
+        return False
+    Name = ""
+    if 'name' in json_data:
+        Name =  json_data['name']
+        
+    Category = ""
+    if 'category' in json_data:
+        Category = json_data['category']
+        
+    Distance = ""
+    if 'distance' in json_data:
+        Distance = json_data['distance']
     
-    GunTime = json_data['gunTime']
+    GunTime = ""
     
-    NetTime = json_data['netTime']
+    if 'gunTime' in json_data:
+        GunTime = json_data['gunTime']
+    
+    NetTime = ""
+    if 'netTime' in json_data:
+        NetTime = json_data['netTime']
 
-    OverallRank = json_data['overallRank']
-    CategoryRank = json_data['categoryRank']
+    OverallRank = ""
+    if 'overallRank' in json_data:
+        OverallRank = json_data['overallRank']
+        
+    CategoryRank = ""
+    if 'categoryRank' in json_data:
+        CategoryRank = json_data['categoryRank']
     
-    Gender = json_data['gender']
+    Gender = ""
+    if 'gender' in json_data:
+       Gender = json_data['gender']
     
-    GenderRank = json_data['genderRank']
+    GenderRank = ""
+    if 'genderRank' in json_data:
+        GenderRank = json_data['genderRank']
 
 #Write details into database
     runners_id = insert_runners_details(conn, Name, Gender);
@@ -140,31 +185,15 @@ def parseAndWriteResponse(conn, event_id, json_data):
     print("Inserting Splits Data")
     for item in json_data['laps']:
         Insert_splits_data(conn, event_id, runners_id, BIB, item['distance'], item['time'])
-    return
+    return True
 
 conn = sqlite3.connect('data/RunningData.db')
 print("Inserting Event ID Details")
 event_id = insert_event_details(conn);
-bibNumber = START_BIB_NUMBER
+bibNumber = START_BIB_NUMBER    
 
-while( bibNumber < END_BIB_NUMBER):
-    
-    resultURL=""
-    
-    if bibNumber <1000:    
-        resultURL= RACE_URL+"MARATHON+ELITE&bibNo="+str(bibNumber)
-    else:
-        if bibNumber <20000:
-            #https://appapi.racetime.in/result/details?raceID=20b2ab6a-4ca2-4312-9813-13584f53d8bc&event=TIMED+10K&bibNo=14047 
-            resultURL= RACE_URL+"TIMED+10K&bibNo="+str(bibNumber)
-        else:
-            if bibNumber <40000:
-                #https://appapi.racetime.in/result/details?raceID=20b2ab6a-4ca2-4312-9813-13584f53d8bc&event=HALF+MARATHON&bibNo=26668
-                resultURL= RACE_URL+"HALF+MARATHON&bibNo="+str(bibNumber)
-            else :
-                #https://appapi.racetime.in/result/details?raceID=20b2ab6a-4ca2-4312-9813-13584f53d8bc&event=MARATHON&bibNo=44103
-                resultURL= RACE_URL+"MARATHON&bibNo="+str(bibNumber)
-        
+while( bibNumber < END_BIB_NUMBER):    
+    resultURL=get_result_url(bibNumber)        
     print(resultURL)
     http = urllib3.PoolManager(cert_reqs='CERT_NONE')
     urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
