@@ -17,10 +17,10 @@ import csv
 import sqlite3
 import json
 
-EVENT_NAME="Shriram Properties Bengaluru Marathon 2022 October"
+EVENT_NAME="Shriram Properties Bengaluru Marathon April 2022"
 EVENT_CITY="Bangalore"
-EVENT_DATE="16th October 2022"
-RACE_URL="https://appapi.racetime.in/result/details?raceID=20b2ab6a-4ca2-4312-9813-13584f53d8bc&event="
+EVENT_DATE="4th April 2022"
+RACE_URL="https://appapi.racetime.in/result/details?raceID=aa5c6390-a5a3-4bb3-a7b7-ffcbd0a2b8f2&event="
 EVENT_YEAR="2022"
 START_BIB_NUMBER=1
 END_BIB_NUMBER=500000
@@ -28,19 +28,10 @@ END_BIB_NUMBER=500000
 #Change url based on event category
 def get_result_url(bibNumber):
     resultURL=""
-    if bibNumber <1000:    
-        resultURL= RACE_URL+"MARATHON+ELITE&bibNo="+str(bibNumber)
+    if bibNumber <40000:
+        resultURL= RACE_URL+"HALF+MARATHON&bibNo="+str(bibNumber)
     else:
-        if bibNumber <20000:
-            #https://appapi.racetime.in/result/details?raceID=20b2ab6a-4ca2-4312-9813-13584f53d8bc&event=TIMED+10K&bibNo=14047 
-            resultURL= RACE_URL+"TIMED+10K&bibNo="+str(bibNumber)
-        else:
-            if bibNumber <40000:
-                #https://appapi.racetime.in/result/details?raceID=20b2ab6a-4ca2-4312-9813-13584f53d8bc&event=HALF+MARATHON&bibNo=26668
-                resultURL= RACE_URL+"HALF+MARATHON&bibNo="+str(bibNumber)
-            else :
-                #https://appapi.racetime.in/result/details?raceID=20b2ab6a-4ca2-4312-9813-13584f53d8bc&event=MARATHON&bibNo=44103
-                resultURL= RACE_URL+"MARATHON&bibNo="+str(bibNumber)
+        resultURL= RACE_URL+"MARATHON&bibNo="+str(bibNumber)      
                 
     return resultURL
                 
@@ -61,7 +52,7 @@ def insert_event_details(conn):
         print("Event Already Found")
         return EventID
     
-    sql="INSERT INTO EventDetails(EventName, EventCity, EventDate, EventURL, EventCity, EventYear) VALUES('"+EVENT_NAME+"','"+EVENT_CITY+"','"+EVENT_DATE+"','"+RESULT_URL+"','"+EVENT_CITY+"','"+EVENT_YEAR+"')" 
+    sql="INSERT INTO EventDetails(EventName, EventCity, EventDate, EventURL, EventCity, EventYear) VALUES('"+EVENT_NAME+"','"+EVENT_CITY+"','"+EVENT_DATE+"','"+RACE_URL+"','"+EVENT_CITY+"','"+EVENT_YEAR+"')" 
     conn.execute(sql);
     conn.commit()
     EventID=get_event_ID(conn, EVENT_NAME);
