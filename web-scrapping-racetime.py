@@ -183,6 +183,7 @@ conn = sqlite3.connect('data/RunningData.db')
 event_id = insert_event_details(conn);
 bibNumber = START_BIB_NUMBER    
 count = 0
+print("Started collecting data for event",EVENT_NAME)
 while( bibNumber < END_BIB_NUMBER):    
     resultURL=get_result_url(bibNumber)        
     #print(resultURL)
