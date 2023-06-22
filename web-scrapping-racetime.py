@@ -47,9 +47,9 @@ def get_event_ID(conn, event_name):
 def insert_event_details(conn):
     EventID=get_event_ID(conn, EVENT_NAME);
     
-    print("EventID:",EventID)
+    #print("EventID:",EventID)
     if(EventID>0):
-        print("Event Already Found")
+        #print("Event Already Found")
         return EventID
     
     sql="INSERT INTO EventDetails(EventName, EventCity, EventDate, EventURL, EventCity, EventYear) VALUES('"+EVENT_NAME+"','"+EVENT_CITY+"','"+EVENT_DATE+"','"+RACE_URL+"','"+EVENT_CITY+"','"+EVENT_YEAR+"')" 
@@ -73,7 +73,7 @@ def insert_runners_details(conn, name, gender):
     if(runners_id>0):        
         return runners_id
     sql="INSERT INTO RunnersDetails (Name, Gender) VALUES ( '"+name+"', '"+gender+"')";
-    print(sql)    
+    #print(sql)    
     conn.execute(sql);
     conn.commit()
     runners_id=get_runners_ID(conn, name,gender);
@@ -94,11 +94,11 @@ def insert_row_in_db(conn, event_id, runners_id, BIB, NetTime, GunTime, OverallR
     record_id = get_record_id_from_event_data_table(conn, event_id, BIB)
     
     if record_id >0:
-       print("Record already Present");
+       #print("Record already Present");
        return 0;
 
     sql = "INSERT INTO EventData ( BIB, RunnersID, EventID, FinishTime, GunTime, RankOverall, RankCategory, Distance,Category ) VALUES ('"+str(BIB)+ "','"+str(runners_id)+"','"+str(event_id)+"','"+ NetTime+"','"+ GunTime+"','"+ str(OverallRank)+"','"+ str(CategoryRank)+"','"+str(Distance)+"', '"+Category+"')"
-    print("SQL",sql)
+    #print("SQL",sql)
     conn.execute(sql);
     conn.commit()
     return 1;
@@ -107,7 +107,7 @@ def insert_row_in_db(conn, event_id, runners_id, BIB, NetTime, GunTime, OverallR
 def Get_splits_data(conn, event_id, runners_id, BIB, Distance):
     id=0
     sql="SELECT ID from SplitsDetails where EventID='"+str(event_id)+"' AND RunnersID='"+str(runners_id)+"' AND BIB='"+str(BIB)+"' AND Distance='"+str(Distance)+"'"
-    print("SQL:",sql)
+    #print("SQL:",sql)
     cursor = conn.execute(sql);
     for row in cursor:
        id = row[0]
@@ -117,10 +117,10 @@ def Get_splits_data(conn, event_id, runners_id, BIB, Distance):
 def Insert_splits_data(conn, event_id, runners_id, BIB, Distance, Time):
     split_id = Get_splits_data(conn, event_id, runners_id, BIB, Distance)
     if split_id >0:
-        print("Split Data already present")
+        #print("Split Data already present")
         return True
     sql="INSERT INTO SplitsDetails(EventID, RunnersID, BIB, Distance, Time) VALUES('"+str(event_id)+"','"+str(runners_id)+"','"+str(BIB)+"','"+str(Distance)+"','"+str(Time)+"')"
-    print("Spilits Insert SQL:",sql)    
+    #print("Spilits Insert SQL:",sql)    
     conn.execute(sql);
     conn.commit()
     
@@ -131,7 +131,7 @@ def parseAndWriteResponse(conn, event_id, json_data):
     if 'bibNo' in json_data:
         BIB = json_data['bibNo']
     else:
-        print(" Invalid Json, Bib not found:", json_data)
+        #print(" Invalid Json, Bib not found:", json_data)
         return False
     Name = ""
     if 'name' in json_data:
@@ -173,19 +173,23 @@ def parseAndWriteResponse(conn, event_id, json_data):
 #Write details into database
     runners_id = insert_runners_details(conn, Name, Gender);
     insert_row_in_db(conn, event_id, runners_id, BIB, NetTime, GunTime, OverallRank, Category, CategoryRank, Distance )
-    print("Inserting Splits Data")
+    #print("Inserting Splits Data")
     for item in json_data['laps']:
         Insert_splits_data(conn, event_id, runners_id, BIB, item['distance'], item['time'])
     return True
 
 conn = sqlite3.connect('data/RunningData.db')
-print("Inserting Event ID Details")
+#print("Inserting Event ID Details")
 event_id = insert_event_details(conn);
 bibNumber = START_BIB_NUMBER    
-
+count = 0
 while( bibNumber < END_BIB_NUMBER):    
     resultURL=get_result_url(bibNumber)        
-    print(resultURL)
+    #print(resultURL)
+    if count == 100:
+        print(" Fetching details of BIB:", bibNumber)
+        count =0
+    count = count + 1    
     http = urllib3.PoolManager(cert_reqs='CERT_NONE')
     urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
     result = http.request('GET', resultURL)
