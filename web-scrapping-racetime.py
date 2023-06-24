@@ -17,21 +17,22 @@ import csv
 import sqlite3
 import json
 
-EVENT_NAME="Shriram Properties Bengaluru Marathon April 2022"
+EVENT_NAME="BENGALURU 10K CHALLENGE 2022"
 EVENT_CITY="Bangalore"
-EVENT_DATE="4th April 2022"
-RACE_URL="https://appapi.racetime.in/result/details?raceID=aa5c6390-a5a3-4bb3-a7b7-ffcbd0a2b8f2&event="
+EVENT_DATE="24TH JULY 2022"
+RACE_URL="https://appapi.racetime.in/result/details?raceID=0fd3c60f-29cb-4505-bfaa-712da0e08a6a&event="
 EVENT_YEAR="2022"
 START_BIB_NUMBER=1
-END_BIB_NUMBER=500000
+END_BIB_NUMBER=50000
+CATEGORY_MIN_PARTICIPANTS=200
 
 #Change url based on event category
 def get_result_url(bibNumber):
     resultURL=""
-    if bibNumber <40000:
-        resultURL= RACE_URL+"HALF+MARATHON&bibNo="+str(bibNumber)
+    if bibNumber <10000:
+        resultURL= RACE_URL+"5K&bibNo="+str(bibNumber)
     else:
-        resultURL= RACE_URL+"MARATHON&bibNo="+str(bibNumber)      
+        resultURL= RACE_URL+"10K&bibNo="+str(bibNumber)      
                 
     return resultURL
                 
@@ -178,28 +179,34 @@ def parseAndWriteResponse(conn, event_id, json_data):
         Insert_splits_data(conn, event_id, runners_id, BIB, item['distance'], item['time'])
     return True
 
-conn = sqlite3.connect('data/RunningData.db')
-#print("Inserting Event ID Details")
-event_id = insert_event_details(conn);
-bibNumber = START_BIB_NUMBER    
-count = 0
-print("Started collecting data for event",EVENT_NAME)
-while( bibNumber < END_BIB_NUMBER):    
-    resultURL=get_result_url(bibNumber)        
-    #print(resultURL)
-    if count == 100:
-        print(" Fetching details of BIB:", bibNumber)
-        count =0
-    count = count + 1    
-    http = urllib3.PoolManager(cert_reqs='CERT_NONE')
-    urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
+def collectData(http, resultURL, event_id):
     result = http.request('GET', resultURL)
     
     if result.status == 200:
        json_data = result.data             
        result = json.loads(json_data)       
        parseAndWriteResponse(conn, event_id, result['data'])
-    
-    bibNumber =bibNumber+1
+       return True
+    return False
+
+conn = sqlite3.connect('data/RunningData.db')
+#print("Inserting Event ID Details")
+event_id = insert_event_details(conn);
+bibNumber = START_BIB_NUMBER    
+count = 0
+print("Started collecting data for event",EVENT_NAME)
+http = urllib3.PoolManager(cert_reqs='CERT_NONE')
+urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
+
+goodBibFound = False
+while( bibNumber < END_BIB_NUMBER):    
+    resultURL=get_result_url(bibNumber)
+    #print(resultURL)
+    if count == 100:
+        print(" Fetching details of BIB:", bibNumber)
+        count =0
+    result = collectData(http, resultURL, event_id)
+    count = count + 1    
+    bibNumber = bibNumber+1
 
 print("Completed successfully")
