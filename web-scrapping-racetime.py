@@ -209,3 +209,4 @@ while( bibNumber < END_BIB_NUMBER):
     bibNumber = bibNumber+1
 
 print("Completed successfully")
+conn.close()
