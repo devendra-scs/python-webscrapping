@@ -23,8 +23,8 @@ EVENT_DATE="24TH JULY 2022"
 RACE_URL="https://appapi.racetime.in/result/details?raceID=0fd3c60f-29cb-4505-bfaa-712da0e08a6a&event="
 EVENT_YEAR="2022"
 START_BIB_NUMBER=1
-END_BIB_NUMBER=50000
-CATEGORY_MIN_PARTICIPANTS=200
+END_BIB_NUMBER=80000
+
 
 #Change url based on event category
 def get_result_url(bibNumber):
@@ -83,7 +83,7 @@ def insert_runners_details(conn, name, gender):
     
 def get_record_id_from_event_data_table(conn, event_id, BIB):
     record_id=0
-    sql="SELECT ID from EventData where EventId='"+str(event_id)+"' and BIB='"+BIB+"'";
+    sql="SELECT ID from EventData where EventId='"+str(event_id)+"' and BIB='"+str(BIB)+"'";
     cursor = conn.execute(sql)
     for row in cursor:
        record_id = row[0]
@@ -98,7 +98,7 @@ def insert_row_in_db(conn, event_id, runners_id, BIB, NetTime, GunTime, OverallR
        #print("Record already Present");
        return 0;
 
-    sql = "INSERT INTO EventData ( BIB, RunnersID, EventID, FinishTime, GunTime, RankOverall, RankCategory, Distance,Category ) VALUES ('"+str(BIB)+ "','"+str(runners_id)+"','"+str(event_id)+"','"+ NetTime+"','"+ GunTime+"','"+ str(OverallRank)+"','"+ str(CategoryRank)+"','"+str(Distance)+"', '"+Category+"')"
+    sql = "INSERT INTO EventData ( BIB, RunnersID, EventID, FinishTime, GunTime, RankOverall, RankCategory, Distance,Category ) VALUES ('"+str(BIB)+ "','"+str(runners_id)+"','"+str(event_id)+"','"+ str(NetTime)+"','"+ str(GunTime)+"','"+ str(OverallRank)+"','"+ str(CategoryRank)+"','"+str(Distance)+"', '"+Category+"')"
     #print("SQL",sql)
     conn.execute(sql);
     conn.commit()
@@ -179,7 +179,7 @@ def parseAndWriteResponse(conn, event_id, json_data):
         Insert_splits_data(conn, event_id, runners_id, BIB, item['distance'], item['time'])
     return True
 
-def collectData(http, resultURL, event_id):
+def collectData(conn, http, resultURL, event_id):
     result = http.request('GET', resultURL)
     
     if result.status == 200:
@@ -198,14 +198,13 @@ print("Started collecting data for event",EVENT_NAME)
 http = urllib3.PoolManager(cert_reqs='CERT_NONE')
 urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
-goodBibFound = False
 while( bibNumber < END_BIB_NUMBER):    
     resultURL=get_result_url(bibNumber)
     #print(resultURL)
     if count == 100:
         print(" Fetching details of BIB:", bibNumber)
         count =0
-    result = collectData(http, resultURL, event_id)
+    result = collectData(conn, http, resultURL, event_id)
     count = count + 1    
     bibNumber = bibNumber+1
 
