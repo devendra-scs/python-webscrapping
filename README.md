@@ -13,3 +13,13 @@ See the License for the specific language governing permissions and
 limitations under the License.
 
 Pull timing data from known public website. Use above scripts with your own risk.
+
+Sample Queries:
+
+Get list of all events:
+
+SELECT *  FROM EventDetails;
+
+To Get list of total finshers across events:-
+SELECT COUNT(E.ID) TotalFinishers, ED.EventName FROM EventData E, EventDetails ED  WHERE E.EventID=ED.ID group by E.eventid order by TotalFinishers DESC
+
