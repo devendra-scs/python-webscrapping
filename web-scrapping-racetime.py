@@ -17,22 +17,34 @@ import csv
 import sqlite3
 import json
 
-EVENT_NAME="BENGALURU 10K CHALLENGE 2022"
+EVENT_NAME="BANGALORE ULTRA 2022"
 EVENT_CITY="Bangalore"
-EVENT_DATE="24TH JULY 2022"
-RACE_URL="https://appapi.racetime.in/result/details?raceID=0fd3c60f-29cb-4505-bfaa-712da0e08a6a&event="
+EVENT_DATE="18TH DECEMBER 2022"
+RACE_URL="https://appapi.racetime.in/result/details?raceID=c6a17c95-fdcf-4d69-a36d-4a5e222f05ca&event="
 EVENT_YEAR="2022"
-START_BIB_NUMBER=1
+START_BIB_NUMBER=71401
 END_BIB_NUMBER=80000
 
 
 #Change url based on event category
 def get_result_url(bibNumber):
     resultURL=""
-    if bibNumber <10000:
-        resultURL= RACE_URL+"5K&bibNo="+str(bibNumber)
-    else:
-        resultURL= RACE_URL+"10K&bibNo="+str(bibNumber)      
+    if bibNumber <100:
+        resultURL= RACE_URL+"100K&bibNo="+str(bibNumber)
+    else:    
+        if bibNumber <25000:
+            resultURL= RACE_URL+"12.5K&bibNo="+str(bibNumber)
+        else:
+            if bibNumber <37000:
+                resultURL= RACE_URL+"25K&bibNo="+str(bibNumber)
+            else:
+                if bibNumber <50000:
+                    resultURL= RACE_URL+"37.5K&bibNo="+str(bibNumber)
+                else:
+                    if bibNumber <75000:
+                        resultURL= RACE_URL+"50K&bibNo="+str(bibNumber)
+                    else:
+                        resultURL= RACE_URL+"75K&bibNo="+str(bibNumber)          
                 
     return resultURL
                 
