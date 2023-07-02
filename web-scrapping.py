@@ -20,19 +20,20 @@ EVENT_NAME="BENGALURU 10K CHALLENGE"
 EVENT_CITY="Bangalore"
 EVENT_DATE="JULY 2, 2023"
 EVENT_YEAR="2023"
-START_BIB_NUMBER=1
-END_BIB_NUMBER=80000
-BASE_URL ='https://www.sportstimingsolutions.in/share.php?event_id=738999913&bib='
+START_BIB_NUMBER=10000
+END_BIB_NUMBER=30000
+BASE_URL ='https://www.sportstimingsolutions.in/share.php?event_id=74701&bib='
 #<END Modify>
     
-def parseAndWriteResponse(event_id, soup, bibNumber):
-        
+def parseAndWriteResponse(event_id, soup, bibNumber):    
     name=soup.find("h3",{"class":"txt-color img-padding"})
+    
     if name is  None:
         return False
     #row=['BIB', 'Name', 'Finished Time', 'Chip Pace (min/km)', 'Rank Overall', "Category Rank", "Category"]
     name = name.text.strip()
-    finishedTime= soup.find("td", {"class":"text-center neww-table he"})
+    
+    finishedTime= soup.find("td", {"class":"text-center neww-table he"}).text    
     timers= soup.find_all("td", {"class":"text-center neww-table"})
     pace= timers[0].text
     rankOverall= timers[1].text
@@ -45,19 +46,16 @@ def parseAndWriteResponse(event_id, soup, bibNumber):
        Gender = "Women"
     else:
        Gender = ""
-    finishedTime=""
-    rankOverall=""
-    category=""
-    categoryRank="" 
+    
     distance=""
     splits={}
     pace=""
     
     #Write details into database
-    runners_id = dbutil.insert_runners_details(name, Gender);    
+    runners_id = dbutil.insert_runners_details(name, Gender);
+    #print(event_id, runners_id, bibNumber, finishedTime, "".format(), rankOverall, category, categoryRank, "".format() )
     dbutil.insert_row_in_db(event_id, runners_id, bibNumber, finishedTime, "".format(), rankOverall, category, categoryRank, "".format() )
-
-    table =soup.find_all("table", class_='table text-center')
+    table =soup.find_all("table", class_='table')    
     # Parse split data
     #Interval	Gun Time	Chip Time	Chip Pace (min/km)	Speed
     for row in table:
@@ -78,7 +76,8 @@ def parseAndWriteResponse(event_id, soup, bibNumber):
                speed = val
             #print("Distance:", distance," GunTime:", gunTime, " ChipTime:", chipTime, " Pace:", pace, " Speed:", speed)
                #Insert_splits_data(conn, event_id, runners_id, bibNumber, distance, chipTime)
-               dbutil.Insert_splits_data(event_id, runners_id, bibNumber, distance, chipTime)
+               #print(event_id, runners_id, bibNumber, distance, gunTime)
+               dbutil.Insert_splits_data(event_id, runners_id, bibNumber, distance, gunTime)
                idx =0
                continue
             idx = idx+1
@@ -89,6 +88,7 @@ http = urllib3.PoolManager(cert_reqs='CERT_NONE')
 urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 count = 0
 #print("Inserting Event ID Details")
+dbutil = DatabaseUtil()
 event_id = dbutil.insert_event_details(EVENT_NAME, EVENT_CITY, EVENT_DATE, EVENT_YEAR,BASE_URL)
 
 while( bibNumber < END_BIB_NUMBER):
@@ -103,6 +103,9 @@ while( bibNumber < END_BIB_NUMBER):
     if result.status == 200:
         soup = BeautifulSoup(html, "html5lib")
         parseAndWriteResponse(event_id, soup, bibNumber)
+    else:
+        print("Failed")
+    
     bibNumber = bibNumber+1
     
 print("Completed successfully")

@@ -23,7 +23,7 @@ count=0
 row=['Name', 'BIB Number','Year','Distance','Finished Time', 'PACE(min/km)', 'Rank Overall', "Category Rank", "City", "EventName"]
 csvWriter = csv.writer(csvFile)
 writeCSVRow(csvWriter, row)
-conn = sqlite3.connect('RunningData.db')
+conn = sqlite3.connect('data/RunningData.db')
 covert_sqlite_to_csv(conn,csvWriter,row)
 conn.close()
 csvFile.close()
