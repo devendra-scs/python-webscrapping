@@ -32,7 +32,7 @@ class DatabaseUtil:
            EventID = row[0]
         return EventID;
 
-    def insert_event_details(self, event_name, event_city, event_date, event_year):
+    def insert_event_details(self, event_name, event_city, event_date, event_year, base_url):
         EventID=self.get_event_ID(event_name);
         
         #print("EventID:",EventID)
@@ -40,10 +40,10 @@ class DatabaseUtil:
             #print("Event Already Found")
             return EventID
         
-        sql="INSERT INTO EventDetails(EventName, EventCity, EventDate, EventURL, EventYear) VALUES('"+event_name+"','"+event_city+"','"+event_date+"','"+BASE_URL+"','"+event_year+"')"
+        sql="INSERT INTO EventDetails(EventName, EventCity, EventDate, EventURL, EventYear) VALUES('"+event_name+"','"+event_city+"','"+event_date+"','"+base_url+"','"+event_year+"')"
         self.conn.execute(sql);
         self.conn.commit()
-        EventID=self.get_event_ID(self.conn, event_name);
+        EventID=self.get_event_ID( event_name);
         
         return EventID;
 
@@ -105,8 +105,8 @@ class DatabaseUtil:
             #print("Split Data already present")
             return True
         sql="INSERT INTO SplitsDetails(EventID, RunnersID, BIB, Distance, Time) VALUES('"+str(event_id)+"','"+str(runners_id)+"','"+str(BIB)+"','"+str(Distance)+"','"+str(Time)+"')"
-        #print("Spilits Insert SQL:",sql)    
+        #print("Spilits Insert SQL:",sql)
         self.conn.execute(sql)
-        self.conn.commit()    
+        self.conn.commit()
         return True
   

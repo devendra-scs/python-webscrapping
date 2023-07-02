@@ -13,36 +13,47 @@ __status__ = "Production"
 import requests
 from bs4 import BeautifulSoup
 import urllib3
-import csv
-import sqlite3
 import base64
 from db.dbutil import DatabaseUtil
 
 
 #Change below values 
-EVENT_NAME="SPIRIT OF WIPRO RUN BENGALURU 2019 "
-EVENT_CITY="Bangalore"
-EVENT_DATE="MAY 21, 2019"
-EVENT_YEAR="2019"
-START_BIB_NUMBER=10000
-END_BIB_NUMBER=20000
-BASE_URL ="https://www.timingindia.com/my-result-details/"
+EVENT_NAME="IDBI Federal Life Insurance New Delhi Marathon 2018"
+EVENT_CITY="Delhi"
+EVENT_DATE="21 October 2018"
+EVENT_YEAR="2018"
+START_BIB_NUMBER=19000
+END_BIB_NUMBER=50000
+BASE_URL ="https://www.timingindia.com/includes/details.php?bib="
+
+  
+def getURL(bibNumber):
+#https://www.timingindia.com/includes/details.php?bib=MjY4NzY,&tble=dGltaW5nX3IxODAyX2RlbG1hcl9obQ,,&eid=SURCSSBGZWRlcmFsIExpZmUgSW5zdXJhbmNlIE5ldyBEZWxoaSBNYXJhdGhvbiAyMDE4
+#https://www.timingindia.com/includes/details.php?bib=NDUxMjM=,&eid=SURCSSBGZWRlcmFsIExpZmUgSW5zdXJhbmNlIE5ldyBEZWxoaSBNYXJhdGhvbiAyMDE4
+
+    ENCODED_EVENT_NAME_YEAR =",&tble=dGltaW5nX3IxODAyX2RlbG1hcl9obQ,,&eid=SURCSSBGZWRlcmFsIExpZmUgSW5zdXJhbmNlIE5ldyBEZWxoaSBNYXJhdGhvbiAyMDE4"
+    URL = BASE_URL+base64.b64encode(str(bibNumber).encode("ascii")).decode("ascii")+ENCODED_EVENT_NAME_YEAR
+    return URL
+
 def parseAndWriteResponse(dbutil, event_id, soup, bibNumber):
     
-    distance = soup.find_all("h3")
+    distance = soup.find_all("h3", {"id": "head"})
     distance_found = False
     for dist in distance:
         distance = dist.text.strip()
         distance_found = True
-    
+
     if distance_found is False:
+       #print("Not found")
        return False
     
     if distance.find("10K") !=-1:
         distance ="10KM"
     elif distance.find("HALF") !=-1:
          distance ="21.1"
-         
+    elif distance.find("Marathon") !=-1:
+         distance ="42.2"
+    
     table = soup.find("table",class_='table table-curved tborder')
     name =""
     Gender =""
@@ -56,54 +67,53 @@ def parseAndWriteResponse(dbutil, event_id, soup, bibNumber):
     
     for row in table.find_all("tr"):
         col = row.find_all("td")
-        key = col[0].text.strip()
+        k = col[0].text.strip()
         val = col[1].text.strip()
         
-        if key.find("Name") !=-1:
+        if k.find("Name") !=-1:
              name = val
-        elif key.find("Gender")!=-1:
+        elif k.find("Gender")!=-1:
              Gender = val
-        elif key.find("Category Rank")!=-1:
+        elif k.find("Category Rank")!=-1:
             categoryRank = val
-        elif key.find("Category")!=-1:
+        elif k.find("Category")!=-1:
             category= val
-        elif key.find("Rank")!=-1:
+        elif k.find("Rank")!=-1:
             rankOverall= val
-        elif key.find("Split")!=-1:
-            splits[key]= val.split()[0]
-             
-            
-        elif key.find("Net Time")!=-1:
+            if len(val)<1:
+                return False
+        elif k.find("Split")!=-1:
+            if len(val)<=1:
+                continue
+            splits[k]= val.split()[0]
+        elif k.find("Net Time")!=-1:
              finishedTime = val
-            
-        # for cell in row.find_all("td"):
-            # print(cell.text)
+
     #print("Name", name, " Gender:", Gender," Category:", category, " RankOverAll:", rankOverall," CategoryRank:", categoryRank, " FinishedTime:", finishedTime," Pace:", pace)
+    
     runners_id = dbutil.insert_runners_details(name, Gender);
     dbutil.insert_row_in_db(event_id, runners_id, bibNumber, finishedTime, pace, rankOverall, category, categoryRank, distance )
-    while key in splits:
+    for key in splits:
         dbutil.Insert_splits_data(event_id, runners_id, bibNumber, key, splits[key])
+        #print("Key:", key, " Val:", splits[key])
    
     return True
 
-def getURL(bibNumber):
-    encodedpart = str(bibNumber)+":timing_r1909_sowben_10k:SPIRIT OF WIPRO RUN BENGALURU 2019"    
-    url = BASE_URL+base64.b64encode(encodedpart.encode("ascii")).decode("ascii")
-    return url
+
     
 dbutil = DatabaseUtil()
 bibNumber = START_BIB_NUMBER
 #http = urllib3.PoolManager(cert_reqs='CERT_NONE')
 #urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 count = 0
-event_id = dbutil.insert_event_details(EVENT_NAME, EVENT_CITY, EVENT_DATE, EVENT_YEAR)
+event_id = dbutil.insert_event_details(EVENT_NAME, EVENT_CITY, EVENT_DATE, EVENT_YEAR,BASE_URL)
 
 while( bibNumber < END_BIB_NUMBER):
     
     resultURL=getURL(bibNumber)
-    #print(" Fetching details of BIB:", bibNumber)
-    if bibNumber % 100 == 0:
-        print(" Fetching details of BIB:", bibNumber)
+    #print(" Fetching details of BIB:", resultURL)
+    #if bibNumber % 100 == 0:
+    print(" Fetching details of BIB:", bibNumber)
         
     #result = http.request('GET', resultURL)
     result = requests.get(resultURL)    
@@ -112,6 +122,6 @@ while( bibNumber < END_BIB_NUMBER):
        soup = BeautifulSoup(html, "html.parser")
        parseAndWriteResponse(dbutil, event_id, soup, bibNumber)
        
-    bibNumber = bibNumber+1    
+    bibNumber = bibNumber+1
     
 print("Completed successfully")   
