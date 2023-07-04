@@ -20,8 +20,8 @@ EVENT_NAME="BENGALURU 10K CHALLENGE"
 EVENT_CITY="Bangalore"
 EVENT_DATE="JULY 2, 2023"
 EVENT_YEAR="2023"
-START_BIB_NUMBER=10000
-END_BIB_NUMBER=30000
+START_BIB_NUMBER=10788
+END_BIB_NUMBER=19507
 BASE_URL ='https://www.sportstimingsolutions.in/share.php?event_id=74701&bib='
 #<END Modify>
     
@@ -33,29 +33,35 @@ def parseAndWriteResponse(event_id, soup, bibNumber):
     #row=['BIB', 'Name', 'Finished Time', 'Chip Pace (min/km)', 'Rank Overall', "Category Rank", "Category"]
     name = name.text.strip()
     
-    finishedTime= soup.find("td", {"class":"text-center neww-table he"}).text    
+    finishedTime= soup.find("td", {"class":"text-center neww-table he"}).text
+    
     timers= soup.find_all("td", {"class":"text-center neww-table"})
+    
     pace= timers[0].text
     rankOverall= timers[1].text
-    categoryRank = timers[2].text
-    category = soup.find("h3", class_='txt-color text-center h3_race_name padding-left').text.strip()
+    genderRank = timers[2].text
+    categoryRank=""
+    if len(timers) >3:
+        categoryRank= timers[3].text
+    
+    thlist= soup.find_all("th", {"class":"text-center"})
+    category = thlist[len(thlist)-1].text
+    #print("Category:", category)
     Gender =""
-    if category.find('Men') != -1:
-       Gender = "Men"
-    elif category.find('Women') != -1:
+    if category.find('Female') != -1:
        Gender = "Women"
     else:
-       Gender = ""
-    
+       Gender = "Men"
+        
     distance=""
     splits={}
     pace=""
     
     #Write details into database
     runners_id = dbutil.insert_runners_details(name, Gender);
-    #print(event_id, runners_id, bibNumber, finishedTime, "".format(), rankOverall, category, categoryRank, "".format() )
-    dbutil.insert_row_in_db(event_id, runners_id, bibNumber, finishedTime, "".format(), rankOverall, category, categoryRank, "".format() )
-    table =soup.find_all("table", class_='table')    
+    #print(event_id, runners_id, bibNumber, finishedTime, "".format(), rankOverall, category, categoryRank, genderRank )
+    dbutil.insert_row_in_db(event_id, runners_id, bibNumber, finishedTime, "".format(), rankOverall, category, categoryRank, genderRank, "10" )
+    table =soup.find_all("table", class_='table')
     # Parse split data
     #Interval	Gun Time	Chip Time	Chip Pace (min/km)	Speed
     for row in table:
@@ -74,9 +80,7 @@ def parseAndWriteResponse(event_id, soup, bibNumber):
                pace = val
             elif idx == 4:
                speed = val
-            #print("Distance:", distance," GunTime:", gunTime, " ChipTime:", chipTime, " Pace:", pace, " Speed:", speed)
-               #Insert_splits_data(conn, event_id, runners_id, bibNumber, distance, chipTime)
-               #print(event_id, runners_id, bibNumber, distance, gunTime)
+
                dbutil.Insert_splits_data(event_id, runners_id, bibNumber, distance, gunTime)
                idx =0
                continue
@@ -93,7 +97,7 @@ event_id = dbutil.insert_event_details(EVENT_NAME, EVENT_CITY, EVENT_DATE, EVENT
 
 while( bibNumber < END_BIB_NUMBER):
     
-    resultURL=BASE_URL+str(bibNumber) 
+    resultURL=BASE_URL+str(bibNumber)      
     print(" Fetching details of BIB:", resultURL)
     if bibNumber % 100 == 0:
         print(" Fetching details of BIB:", bibNumber)
@@ -103,8 +107,7 @@ while( bibNumber < END_BIB_NUMBER):
     if result.status == 200:
         soup = BeautifulSoup(html, "html5lib")
         parseAndWriteResponse(event_id, soup, bibNumber)
-    else:
-        print("Failed")
+
     
     bibNumber = bibNumber+1
     
