@@ -39,7 +39,9 @@ def parseAndWriteResponse(event_id, soup, bibNumber):
     
     pace= timers[0].text
     rankOverall= timers[1].text
-    genderRank = timers[2].text
+    genderRank =""
+    if len(timers) >2:    
+        genderRank = timers[2].text
     categoryRank=""
     if len(timers) >3:
         categoryRank= timers[3].text
