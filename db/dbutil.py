@@ -24,32 +24,32 @@ class DatabaseUtil:
     def __del__(self):
         self.conn.close()
 
-    def get_event_ID(self, event_name):
+    def get_event_ID(self, event_name, event_city, event_year):
         EventID=0
-        sql="SELECT ID from EventDetails where EventName='"+event_name+"'";
+        sql="SELECT ID from EventDetails where EventName='"+event_name.upper()+"' AND EventCity='"+event_city+"' AND EventYear='"+event_year+"'";
         cursor = self.conn.execute(sql);
         for row in cursor:
            EventID = row[0]
         return EventID;
 
     def insert_event_details(self, event_name, event_city, event_date, event_year, base_url):
-        EventID=self.get_event_ID(event_name);
+        EventID=self.get_event_ID(event_name, event_city, event_year)
         
-        #print("EventID:",EventID)
+        print("EventID:",EventID)
         if(EventID>0):
             #print("Event Already Found")
             return EventID
         
-        sql="INSERT INTO EventDetails(EventName, EventCity, EventDate, EventURL, EventYear) VALUES('"+event_name+"','"+event_city+"','"+event_date+"','"+base_url+"','"+event_year+"')"
+        sql="INSERT INTO EventDetails(EventName, EventCity, EventDate, EventURL, EventYear) VALUES('"+event_name.upper()+"','"+event_city+"','"+event_date+"','"+base_url+"','"+event_year+"')"
         self.conn.execute(sql);
         self.conn.commit()
-        EventID=self.get_event_ID( event_name);
+        EventID=self.get_event_ID( event_name, event_city, event_year);
         
         return EventID;
 
     def get_runners_ID(self, name, gender):
         runners_id=0
-        sql="SELECT ID from RunnersDetails WHERE  Name='"+name+"' COLLATE NOCASE AND Gender='"+gender+"'" 
+        sql="SELECT ID from RunnersDetails WHERE  Name='"+name.upper()+"' COLLATE NOCASE AND Gender='"+gender+"'" 
         cursor = self.conn.execute(sql);
         for row in cursor:
            runners_id = row[0]
@@ -60,7 +60,7 @@ class DatabaseUtil:
             
         if(runners_id>0):        
             return runners_id
-        sql="INSERT INTO RunnersDetails (Name, Gender) VALUES ( '"+name+"', '"+gender+"')";
+        sql="INSERT INTO RunnersDetails (Name, Gender) VALUES ( '"+name.upper()+"', '"+gender+"')";
         #print(sql)    
         self.conn.execute(sql);
         self.conn.commit()

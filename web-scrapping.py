@@ -16,12 +16,12 @@ from db.dbutil import DatabaseUtil
 
 #<BEGIN Modify>
 #Change below paramenter
-EVENT_NAME="Adani Ahmedabad Marathon"
+EVENT_NAME="Adani Ahmedabad Marathon 2021"
 EVENT_CITY="Ahmedabad"
 EVENT_DATE="November , 2021"
 EVENT_YEAR="2021"
 START_BIB_NUMBER=1
-END_BIB_NUMBER=49999
+END_BIB_NUMBER=50000
 BASE_URL ='https://www.sportstimingsolutions.in/share.php?event_id=64824&bib='
 #<END Modify>
     
@@ -95,6 +95,7 @@ urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 count = 0
 #print("Inserting Event ID Details")
 dbutil = DatabaseUtil()
+print("Inserting Event Details")
 event_id = dbutil.insert_event_details(EVENT_NAME, EVENT_CITY, EVENT_DATE, EVENT_YEAR,BASE_URL)
 
 while( bibNumber < END_BIB_NUMBER):

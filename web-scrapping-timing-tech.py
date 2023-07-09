@@ -92,7 +92,7 @@ def parseAndWriteResponse(dbutil, event_id, soup, bibNumber):
     #print("Name", name, " Gender:", Gender," Category:", category, " RankOverAll:", rankOverall," CategoryRank:", categoryRank, " FinishedTime:", finishedTime," Pace:", pace)
     
     runners_id = dbutil.insert_runners_details(name, Gender);
-    dbutil.insert_row_in_db(event_id, runners_id, bibNumber, finishedTime, pace, rankOverall, category, categoryRank, distance )
+    dbutil.insert_row_in_db(event_id, runners_id, bibNumber, finishedTime, pace, rankOverall, category, categoryRank, distance, "" )
     for key in splits:
         dbutil.Insert_splits_data(event_id, runners_id, bibNumber, key, splits[key])
         #print("Key:", key, " Val:", splits[key])
