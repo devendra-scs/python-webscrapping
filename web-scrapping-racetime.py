@@ -102,7 +102,7 @@ def get_record_id_from_event_data_table(conn, event_id, BIB):
     return record_id;
     
 #BIB,Finished Time,Pace (min/km),Rank Overall,Category Rank
-def insert_row_in_db(conn, event_id, runners_id, BIB, NetTime, GunTime, OverallRank, Category, CategoryRank, Distance ):
+def insert_row_in_db(conn, event_id, runners_id, BIB, NetTime, GunTime, OverallRank, Category, CategoryRank, Distance , url):
     #Check if runners data for this event already present in database
     record_id = get_record_id_from_event_data_table(conn, event_id, BIB)
     
@@ -110,7 +110,7 @@ def insert_row_in_db(conn, event_id, runners_id, BIB, NetTime, GunTime, OverallR
        #print("Record already Present");
        return 0;
 
-    sql = "INSERT INTO EventData ( BIB, RunnersID, EventID, FinishTime, GunTime, RankOverall, RankCategory, Distance,Category ) VALUES ('"+str(BIB)+ "','"+str(runners_id)+"','"+str(event_id)+"','"+ str(NetTime)+"','"+ str(GunTime)+"','"+ str(OverallRank)+"','"+ str(CategoryRank)+"','"+str(Distance)+"', '"+Category+"')"
+    sql = "INSERT INTO EventData ( BIB, RunnersID, EventID, FinishTime, GunTime, RankOverall, RankCategory, Distance, Category, ResultURL ) VALUES ('"+str(BIB)+ "','"+str(runners_id)+"','"+str(event_id)+"','"+ str(NetTime)+"','"+ str(GunTime)+"','"+ str(OverallRank)+"','"+ str(CategoryRank)+"','"+str(Distance)+"', '"+Category+"','"+url+"')"
     #print("SQL",sql)
     conn.execute(sql);
     conn.commit()
@@ -139,7 +139,7 @@ def Insert_splits_data(conn, event_id, runners_id, BIB, Distance, Time):
     
     return True
 
-def parseAndWriteResponse(conn, event_id, json_data):
+def parseAndWriteResponse(conn, event_id, json_data, url):
     BIB = ""
     if 'bibNo' in json_data:
         BIB = json_data['bibNo']
@@ -185,19 +185,19 @@ def parseAndWriteResponse(conn, event_id, json_data):
 
 #Write details into database
     runners_id = insert_runners_details(conn, Name, Gender);
-    insert_row_in_db(conn, event_id, runners_id, BIB, NetTime, GunTime, OverallRank, Category, CategoryRank, Distance )
+    insert_row_in_db(conn, event_id, runners_id, BIB, NetTime, GunTime, OverallRank, Category, CategoryRank, Distance,url )
     #print("Inserting Splits Data")
     for item in json_data['laps']:
         Insert_splits_data(conn, event_id, runners_id, BIB, item['distance'], item['time'])
     return True
 
-def collectData(conn, http, resultURL, event_id):
+def collectData(conn, http, resultURL, event_id, url):
     result = http.request('GET', resultURL)
     
     if result.status == 200:
        json_data = result.data             
        result = json.loads(json_data)       
-       parseAndWriteResponse(conn, event_id, result['data'])
+       parseAndWriteResponse(conn, event_id, result['data'],url)
        return True
     return False
 
@@ -216,7 +216,7 @@ while( bibNumber < END_BIB_NUMBER):
     if count == 100:
         print(" Fetching details of BIB:", bibNumber)
         count =0
-    result = collectData(conn, http, resultURL, event_id)
+    result = collectData(conn, http, resultURL, event_id, resultURL)
     count = count + 1    
     bibNumber = bibNumber+1
 

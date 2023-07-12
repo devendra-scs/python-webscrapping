@@ -35,7 +35,7 @@ def getURL(bibNumber):
     URL = BASE_URL+base64.b64encode(str(bibNumber).encode("ascii")).decode("ascii")+ENCODED_EVENT_NAME_YEAR
     return URL
 
-def parseAndWriteResponse(dbutil, event_id, soup, bibNumber):
+def parseAndWriteResponse(dbutil, event_id, soup, bibNumber, url):
     
     distance = soup.find_all("h3", {"id": "head"})
     distance_found = False
@@ -92,7 +92,7 @@ def parseAndWriteResponse(dbutil, event_id, soup, bibNumber):
     #print("Name", name, " Gender:", Gender," Category:", category, " RankOverAll:", rankOverall," CategoryRank:", categoryRank, " FinishedTime:", finishedTime," Pace:", pace)
     
     runners_id = dbutil.insert_runners_details(name, Gender);
-    dbutil.insert_row_in_db(event_id, runners_id, bibNumber, finishedTime, pace, rankOverall, category, categoryRank, distance, "" )
+    dbutil.insert_row_in_db(event_id, runners_id, bibNumber, finishedTime, pace, rankOverall, category, categoryRank, distance, "", url )
     for key in splits:
         dbutil.Insert_splits_data(event_id, runners_id, bibNumber, key, splits[key])
         #print("Key:", key, " Val:", splits[key])
@@ -120,7 +120,7 @@ while( bibNumber < END_BIB_NUMBER):
     if result.status_code >= 200 and result.status_code < 300:
        html = result.content
        soup = BeautifulSoup(html, "html.parser")
-       parseAndWriteResponse(dbutil, event_id, soup, bibNumber)
+       parseAndWriteResponse(dbutil, event_id, soup, bibNumber, resultURL)
        
     bibNumber = bibNumber+1
     

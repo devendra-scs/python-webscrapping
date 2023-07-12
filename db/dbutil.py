@@ -76,7 +76,7 @@ class DatabaseUtil:
         return record_id;
         
     #BIB,Finished Time,Pace (min/km),Rank Overall,Category Rank
-    def insert_row_in_db(self, event_id, runners_id, BIB, NetTime, GunTime, OverallRank, Category, CategoryRank, GenderRank, Distance ):
+    def insert_row_in_db(self, event_id, runners_id, BIB, NetTime, GunTime, OverallRank, Category, CategoryRank, GenderRank, Distance, url ):
         #Check if runners data for this event already present in database
         record_id = self.get_record_id_from_event_data_table(event_id, BIB)
         
@@ -84,7 +84,7 @@ class DatabaseUtil:
            #print("Record already Present");
            return 0;
 
-        sql = "INSERT INTO EventData ( BIB, RunnersID, EventID, FinishTime, GunTime, OverallRank, GenderRank, Distance, Category, CategoryRank ) VALUES ('"+str(BIB)+ "','"+str(runners_id)+"','"+str(event_id)+"','"+ str(NetTime)+"','"+ str(GunTime)+"','"+ str(OverallRank)+"','"+ str(GenderRank)+"','"+str(Distance)+"', '"+str(Category)+"','"+str(CategoryRank)+"')"
+        sql = "INSERT INTO EventData ( BIB, RunnersID, EventID, FinishTime, GunTime, OverallRank, GenderRank, Distance, Category, CategoryRank ) VALUES ('"+str(BIB)+ "','"+str(runners_id)+"','"+str(event_id)+"','"+ str(NetTime)+"','"+ str(GunTime)+"','"+ str(OverallRank)+"','"+ str(GenderRank)+"','"+str(Distance)+"', '"+str(Category)+"','"+str(CategoryRank)+"','"+str(url)+"')"
         #print("SQL",sql)
         self.conn.execute(sql);
         self.conn.commit()

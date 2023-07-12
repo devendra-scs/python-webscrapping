@@ -25,7 +25,7 @@ END_BIB_NUMBER=50000
 BASE_URL ='https://www.sportstimingsolutions.in/share.php?event_id=64824&bib='
 #<END Modify>
     
-def parseAndWriteResponse(event_id, soup, bibNumber):    
+def parseAndWriteResponse(event_id, soup, bibNumber, url):
     name=soup.find("h3",{"class":"txt-color img-padding"})
     
     if name is  None:
@@ -62,7 +62,7 @@ def parseAndWriteResponse(event_id, soup, bibNumber):
     #Write details into database
     runners_id = dbutil.insert_runners_details(name, Gender);
     #print(event_id, runners_id, bibNumber, finishedTime, "".format(), rankOverall, category, categoryRank, genderRank )
-    dbutil.insert_row_in_db(event_id, runners_id, bibNumber, finishedTime, "".format(), rankOverall, category, categoryRank, genderRank, "10" )
+    dbutil.insert_row_in_db(event_id, runners_id, bibNumber, finishedTime, "".format(), rankOverall, category, categoryRank, genderRank, "10", url )
     table =soup.find_all("table", class_='table')
     # Parse split data
     #Interval	Gun Time	Chip Time	Chip Pace (min/km)	Speed
@@ -109,7 +109,7 @@ while( bibNumber < END_BIB_NUMBER):
     html = result.data
     if result.status == 200:
         soup = BeautifulSoup(html, "html5lib")
-        parseAndWriteResponse(event_id, soup, bibNumber)
+        parseAndWriteResponse(event_id, soup, bibNumber, resultURL)
 
     
     bibNumber = bibNumber+1
