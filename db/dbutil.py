@@ -58,7 +58,7 @@ class DatabaseUtil:
     def insert_runners_details(self, name, gender):
         runners_id=self.get_runners_ID( name, gender);
             
-        if(runners_id>0):        
+        if(runners_id>0):
             return runners_id
         sql="INSERT INTO RunnersDetails (Name, Gender) VALUES ( '"+name.upper()+"', '"+gender+"')";
         #print(sql)    
@@ -84,7 +84,7 @@ class DatabaseUtil:
            #print("Record already Present");
            return 0;
 
-        sql = "INSERT INTO EventData ( BIB, RunnersID, EventID, FinishTime, GunTime, OverallRank, GenderRank, Distance, Category, CategoryRank ) VALUES ('"+str(BIB)+ "','"+str(runners_id)+"','"+str(event_id)+"','"+ str(NetTime)+"','"+ str(GunTime)+"','"+ str(OverallRank)+"','"+ str(GenderRank)+"','"+str(Distance)+"', '"+str(Category)+"','"+str(CategoryRank)+"','"+str(url)+"')"
+        sql = "INSERT INTO EventData ( BIB, RunnersID, EventID, FinishTime, GunTime, OverallRank, GenderRank, Distance, Category, CategoryRank,ResultURL ) VALUES ('"+str(BIB)+ "','"+str(runners_id)+"','"+str(event_id)+"','"+ str(NetTime)+"','"+ str(GunTime)+"','"+ str(OverallRank)+"','"+ str(GenderRank)+"','"+str(Distance)+"', '"+str(Category)+"','"+str(CategoryRank)+"','"+str(url)+"')"
         #print("SQL",sql)
         self.conn.execute(sql);
         self.conn.commit()

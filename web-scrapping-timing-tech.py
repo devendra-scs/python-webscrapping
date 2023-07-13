@@ -18,21 +18,21 @@ from db.dbutil import DatabaseUtil
 
 
 #Change below values 
-EVENT_NAME="IDBI Federal Life Insurance New Delhi Marathon 2018"
+EVENT_NAME="IDBI Federal Life Insurance New Delhi Marathon 2019"
 EVENT_CITY="Delhi"
-EVENT_DATE="21 October 2018"
-EVENT_YEAR="2018"
-START_BIB_NUMBER=49833
-END_BIB_NUMBER=50000
-BASE_URL ="https://www.timingindia.com/includes/details.php?bib="
+EVENT_DATE="24 Feb 2019"
+EVENT_YEAR="2019"
+START_BIB_NUMBER=25100
+END_BIB_NUMBER=30000
+BASE_URL ="https://www.timingindia.com/my-result-details/"
 
   
 def getURL(bibNumber):
 #https://www.timingindia.com/includes/details.php?bib=MjY4NzY,&tble=dGltaW5nX3IxODAyX2RlbG1hcl9obQ,,&eid=SURCSSBGZWRlcmFsIExpZmUgSW5zdXJhbmNlIE5ldyBEZWxoaSBNYXJhdGhvbiAyMDE4
 #https://www.timingindia.com/includes/details.php?bib=NDUxMjM=,&eid=SURCSSBGZWRlcmFsIExpZmUgSW5zdXJhbmNlIE5ldyBEZWxoaSBNYXJhdGhvbiAyMDE4
 
-    ENCODED_EVENT_NAME_YEAR =",&tble=dGltaW5nX3IxODAyX2RlbG1hcl9obQ,,&eid=SURCSSBGZWRlcmFsIExpZmUgSW5zdXJhbmNlIE5ldyBEZWxoaSBNYXJhdGhvbiAyMDE4"
-    URL = BASE_URL+base64.b64encode(str(bibNumber).encode("ascii")).decode("ascii")+ENCODED_EVENT_NAME_YEAR
+    ENCODED_EVENT_NAME_YEAR =str(bibNumber)+":timing_r1902_delmar_hm:IDBI Federal Life Insurance New Delhi Marathon 2019"
+    URL = BASE_URL+base64.b64encode(str(ENCODED_EVENT_NAME_YEAR).encode("ascii")).decode("ascii")
     return URL
 
 def parseAndWriteResponse(dbutil, event_id, soup, bibNumber, url):
@@ -92,7 +92,7 @@ def parseAndWriteResponse(dbutil, event_id, soup, bibNumber, url):
     #print("Name", name, " Gender:", Gender," Category:", category, " RankOverAll:", rankOverall," CategoryRank:", categoryRank, " FinishedTime:", finishedTime," Pace:", pace)
     
     runners_id = dbutil.insert_runners_details(name, Gender);
-    dbutil.insert_row_in_db(event_id, runners_id, bibNumber, finishedTime, pace, rankOverall, category, categoryRank, distance, "", url )
+    dbutil.insert_row_in_db(event_id, runners_id, bibNumber, finishedTime, pace, rankOverall, category, categoryRank, '21.1', "", url )
     for key in splits:
         dbutil.Insert_splits_data(event_id, runners_id, bibNumber, key, splits[key])
         #print("Key:", key, " Val:", splits[key])
@@ -111,9 +111,9 @@ event_id = dbutil.insert_event_details(EVENT_NAME, EVENT_CITY, EVENT_DATE, EVENT
 while( bibNumber < END_BIB_NUMBER):
     
     resultURL=getURL(bibNumber)
-    #print(" Fetching details of BIB:", resultURL)
+    print("Fetching details of BIB:", bibNumber, "URL:", resultURL)
     #if bibNumber % 100 == 0:
-    print(" Fetching details of BIB:", bibNumber)
+    #print(" Fetching details of BIB:", bibNumber)
         
     #result = http.request('GET', resultURL)
     result = requests.get(resultURL)    
