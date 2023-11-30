@@ -16,13 +16,13 @@ from db.dbutil import DatabaseUtil
 
 #<BEGIN Modify>
 #Change below paramenter
-EVENT_NAME="Adani Ahmedabad Marathon 2021"
-EVENT_CITY="Ahmedabad"
-EVENT_DATE="November , 2021"
-EVENT_YEAR="2021"
-START_BIB_NUMBER=1
-END_BIB_NUMBER=50000
-BASE_URL ='https://www.sportstimingsolutions.in/share.php?event_id=64824&bib='
+EVENT_NAME="WIPRO BENGALURU MARATHON 2023"
+EVENT_CITY="Bangalore"
+EVENT_DATE="8 October, 2023"
+EVENT_YEAR="2023"
+START_BIB_NUMBER=50000
+END_BIB_NUMBER=100000
+BASE_URL ='https://www.sportstimingsolutions.in/share.php?event_id=76619&bib='
 #<END Modify>
     
 def parseAndWriteResponse(event_id, soup, bibNumber, url):
