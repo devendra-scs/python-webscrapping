@@ -19,7 +19,7 @@ DB_FILE_PATH="data/RunningData.db"
 class DatabaseUtil:
     type ='DBUtil'
     def __init__(self):
-        self.conn = sqlite3.connect(DB_FILE_PATH)
+        self.conn = sqlite3.connect(DB_FILE_PATH, check_same_thread=False)
         self.conn_active = True
     def __del__(self):
         self.conn.close()
