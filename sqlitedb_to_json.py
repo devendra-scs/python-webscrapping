@@ -9,7 +9,7 @@ def writeCSVRow(csvWriter, row):
     return
 
 def covert_sqlite_to_csv(soup, csvWriter, row):
-    query= "SELECT  BIB, RD.name, EVD.EventYear, Distance, FinishTime, Pace, OverallRank, GenderRank, Category, CategoryRank, EVD.EventCity, EVD.EventName FROM EventData ED,RunnersDetails RD, EventDetails EVD  WHERE ED.RunnersID=RD.ID  AND EVD.ID=ED.EventID"
+    query= "SELECT  BIB, RD.name, EVD.EventYear, Distance, FinishTime, Pace, OverallRank, GenderRank, Category, CategoryRank, EVD.EventCity, EVD.EventName, ED.RESULTURL FROM EventData ED,RunnersDetails RD, EventDetails EVD  WHERE ED.RunnersID=RD.ID  AND EVD.ID=ED.EventID"
     row.clear()
     cursor = conn.execute(query);
     for row in cursor:
@@ -20,7 +20,7 @@ def covert_sqlite_to_csv(soup, csvWriter, row):
 csvFile= open(OUTPUT_FILE_NAME,  'w', newline='') 
 count=0
 
-row=[ 'BIB Number', 'Name', 'Year','Distance','Finished Time', 'PACE(min/km)', 'Overall Rank', 'Category', 'Category Rank', 'Gender Rank', 'City', 'EventName']
+row=[ 'BIB Number', 'Name', 'Year','Distance','Finished Time', 'PACE(min/km)', 'Overall Rank', 'Category', 'Category Rank', 'Gender Rank', 'City', 'EventName', 'ResultURL']
 csvWriter = csv.writer(csvFile)
 writeCSVRow(csvWriter, row)
 conn = sqlite3.connect('data/RunningData.db')

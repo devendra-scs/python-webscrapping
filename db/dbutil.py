@@ -75,7 +75,7 @@ class DatabaseUtil:
            record_id = row[0]
         return record_id;
         
-    #BIB,Finished Time,Pace (min/km),Rank Overall,Category Rank
+    
     def insert_row_in_db(self, event_id, runners_id, BIB, NetTime, GunTime, OverallRank, Category, CategoryRank, GenderRank, Distance, url ):
         #Check if runners data for this event already present in database
         record_id = self.get_record_id_from_event_data_table(event_id, BIB)
@@ -89,24 +89,24 @@ class DatabaseUtil:
         self.conn.execute(sql);
         self.conn.commit()
         return 1;
-
-    def Get_splits_data(self, event_id, runners_id, BIB, Distance):
-        id=0
-        sql="SELECT ID from SplitsDetails where EventID='"+str(event_id)+"' AND RunnersID='"+str(runners_id)+"' AND BIB='"+str(BIB)+"' AND Distance='"+str(Distance)+"'"
-        #print("SQL:",sql)
-        cursor = self.conn.execute(sql);
-        for row in cursor:
-           id = row[0]
-        return id;
+    
+    #   update row in database
+    def update_row_in_db(self, event_id, record_id, runners_id, BIB, NetTime, GunTime, OverallRank, Category, CategoryRank, GenderRank, Distance, url ):
+        #update row in database
+        sql = "UPDATE EventData SET FinishTime='"+str(NetTime)+"', GunTime='"+str(GunTime)+"', OverallRank='"+str(OverallRank)+"', GenderRank='"+str(GenderRank)+"', Distance='"+str(Distance)+"', Category='"+str(Category)+"', CategoryRank='"+str(CategoryRank)+"', ResultURL='"+str(url)+"' WHERE ID='"+str(record_id)+"'"
+        #print("SQL",sql)        
         
-    def Insert_splits_data(self,  event_id, runners_id, BIB, Distance, Time):
-        split_id = self.Get_splits_data( event_id, runners_id, BIB, Distance)
-        if split_id >0:
-            #print("Split Data already present")
-            return True
-        sql="INSERT INTO SplitsDetails(EventID, RunnersID, BIB, Distance, Time) VALUES('"+str(event_id)+"','"+str(runners_id)+"','"+str(BIB)+"','"+str(Distance)+"','"+str(Time)+"')"
-        #print("Spilits Insert SQL:",sql)
-        self.conn.execute(sql)
+        self.conn.execute(sql);
         self.conn.commit()
-        return True
-  
+        return 1;
+
+    def get_event_all_record_list(self, event_id):
+        # get all id and bib in asscending order of Id and push in dictionary
+        record_list={}
+        sql="SELECT ID, BIB from EventData where EventID='"+str(event_id)+"' and ResultURL is  NULL ORDER BY BIB ASC"    
+        cursor = self.conn.execute(sql)
+        for row in cursor:
+            record_list[row[0]]=row[1]
+        
+        return record_list;
+
