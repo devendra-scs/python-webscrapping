@@ -15,6 +15,10 @@ from bs4 import BeautifulSoup
 import urllib3
 import base64
 from db.dbutil import DatabaseUtil
+import logging
+
+logging.basicConfig(level=logging.DEBUG, format='%(asctime)s - %(levelname)s - %(message)s',filename="web-scrapping-timing-tech.log",filemode='w')
+
 
 
 #Change below values 
@@ -111,7 +115,7 @@ event_id = dbutil.insert_event_details(EVENT_NAME, EVENT_CITY, EVENT_DATE, EVENT
 while( bibNumber < END_BIB_NUMBER):
     
     resultURL=getURL(bibNumber)
-    print("Fetching details of BIB:", bibNumber, "URL:", resultURL)
+    logging.info("Fetching details of BIB:", bibNumber, "URL:"+ resultURL)
     #if bibNumber % 100 == 0:
     #print(" Fetching details of BIB:", bibNumber)
         
@@ -124,4 +128,4 @@ while( bibNumber < END_BIB_NUMBER):
        
     bibNumber = bibNumber+1
     
-print("Completed successfully")   
+logging.info("Completed successfully")   
