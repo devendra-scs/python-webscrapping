@@ -16,6 +16,10 @@ import urllib3
 import csv
 import sqlite3
 import json
+import logging
+
+logging.basicConfig(level=logging.DEBUG, format='%(asctime)s - %(levelname)s - %(message)s',filename="web-scrapping_racetime.log",filemode='w')
+
 
 EVENT_NAME="BANGALORE ULTRA 2022"
 EVENT_CITY="Bangalore"
@@ -206,7 +210,7 @@ conn = sqlite3.connect('data/RunningData.db')
 event_id = insert_event_details(conn);
 bibNumber = START_BIB_NUMBER    
 count = 0
-print("Started collecting data for event",EVENT_NAME)
+logging.info("Started collecting data for event"+EVENT_NAME)
 http = urllib3.PoolManager(cert_reqs='CERT_NONE')
 urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
@@ -214,11 +218,11 @@ while( bibNumber < END_BIB_NUMBER):
     resultURL=get_result_url(bibNumber)
     #print(resultURL)
     if count == 100:
-        print(" Fetching details of BIB:", bibNumber)
+        logging.info(" Fetching details of BIB:", bibNumber)
         count =0
     result = collectData(conn, http, resultURL, event_id, resultURL)
     count = count + 1    
     bibNumber = bibNumber+1
 
-print("Completed successfully")
+logging.info("Completed successfully")
 conn.close()

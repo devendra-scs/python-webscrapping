@@ -1,5 +1,8 @@
 import csv
 import sqlite3
+import logging
+
+logging.basicConfig(level=logging.DEBUG, format='%(asctime)s - %(levelname)s - %(message)s',filename="sqlitedbtojson.log",filemode='w')
 
 #Script to covert sqlite to csv
 OUTPUT_FILE_NAME="Consolidate-Report.csv"
@@ -11,7 +14,7 @@ def writeCSVRow(csvWriter, row):
 def covert_sqlite_to_csv(soup, csvWriter, row):
     query= "SELECT  BIB, RD.name, EVD.EventYear, Distance, FinishTime, Pace, OverallRank, GenderRank, Category, CategoryRank, EVD.EventCity, EVD.EventName, ED.RESULTURL FROM EventData ED,RunnersDetails RD, EventDetails EVD  WHERE ED.RunnersID=RD.ID  AND EVD.ID=ED.EventID"
     row.clear()
-    cursor = conn.execute(query);
+    cursor = conn.execute(query)
     for row in cursor:
         writeCSVRow(csvWriter, row)
 
@@ -27,4 +30,4 @@ conn = sqlite3.connect('data/RunningData.db')
 covert_sqlite_to_csv(conn,csvWriter,row)
 conn.close()
 csvFile.close()
-print("Successfully Coverted");
+logging.info("succesfully converted")

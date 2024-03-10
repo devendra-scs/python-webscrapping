@@ -1,3 +1,4 @@
+#line 29,116
 #!/usr/bin/env python
 
 __author__ = "Devendra Singh"
@@ -14,6 +15,9 @@ from bs4 import BeautifulSoup
 import urllib3
 from db.dbutil import DatabaseUtil
 from concurrent.futures import ThreadPoolExecutor
+import logging
+
+logging.basicConfig(level=logging.DEBUG, format='%(asctime)s - %(levelname)s - %(message)s',filename="web-scrapping_update.log",filemode='w')
 
 # Update here to change event id based on the event
 BASE_URL ='https://www.sportstimingsolutions.in/share.php?event_id=50377&bib='
@@ -23,7 +27,7 @@ http = urllib3.PoolManager(cert_reqs='CERT_NONE')
 urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 dbutil = DatabaseUtil()
 event_id = 3 # Update event id here
-print("Event ID:", event_id)
+logging.info("Event ID:"+str(event_id))
 
 
 def parseAndWriteResponse(event_id, record_id, soup, bibNumber, url):
@@ -31,7 +35,7 @@ def parseAndWriteResponse(event_id, record_id, soup, bibNumber, url):
     name=soup.find("h3",{"class":"txt-color img-padding"})
     
     if name is  None:
-        print(name, "Name not found")
+        logging.debug(name+ " Name not found")
         return False
     #row=['BIB', 'Name', 'Finished Time', 'Chip Pace (min/km)', 'Rank Overall', "Category Rank", "Category"]
     name = name.text.strip()
@@ -77,9 +81,9 @@ def parseAndWriteResponse(event_id, record_id, soup, bibNumber, url):
                 distance="10"
 
         else:
-            print("Error: Distance text not found.")
+            logging.error("Error: Distance text not found.")
     except:
-        print("Error in finding distance")
+        logging.error("Error in finding distance")
 
     splits={}
     pace=""
@@ -93,7 +97,7 @@ def parseAndWriteResponse(event_id, record_id, soup, bibNumber, url):
 
 def process_bib(record_id,  bibNumber):
     resultURL = BASE_URL + str(bibNumber)
-    print(" Fetching details of BIB:", resultURL)
+    logging.info(" Fetching details of BIB:"+ resultURL)
     try:
         result = http.request('GET', resultURL)
         html = result.data
@@ -101,21 +105,21 @@ def process_bib(record_id,  bibNumber):
             soup = BeautifulSoup(html, "html5lib")            
             parseAndWriteResponse(event_id, record_id, soup, bibNumber, resultURL)            
     except Exception as e:
-        print("Error occurred during HTTP request:", str(e))
+        logging.error("Error occurred during HTTP request:", str(e))
     return True    
 
 # Main program
 # Fetch details of all bib numbers
-print("Fetching details of all bib numbers")
+logging.info("Fetching details of all bib numbers")
 
 records = dbutil.get_event_all_record_list(event_id)
 
-print("Total records to process:", len(records))
+logging.info("Total records to process:"+ str(len(records)))
 # Create a thread pool of 5 workers that process records directly from the database
 count = 0
 for k, v in records.items():        
-    print("Completed so far:"+str(count)+" Processing BIB:"+ str(v))
+    logging.info("Completed so far:"+str(count)+" Processing BIB:"+ str(v))
     process_bib(k, v)
     count += 1
 
-print("Completed successfully")
+logging.info("Completed successfully")

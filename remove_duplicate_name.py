@@ -1,5 +1,8 @@
 import sqlite3
 from bs4 import BeautifulSoup
+import logging
+
+logging.basicConfig(level=logging.DEBUG, format='%(asctime)s - %(levelname)s - %(message)s',filename="remove_duplicate.log",filemode='w')
 
 def update_all_duplicate_ids(conn, duplicate_list):
     try:
@@ -15,7 +18,7 @@ def update_all_duplicate_ids(conn, duplicate_list):
             conn.commit()
         cursor.close()
     except Exception as e:
-        print("An error occurred:", str(e), " Old:", old," New:", new)
+        logging.error("An error occurred:", str(e)," Old:" + old," New:"+ new)
         # Rollback the changes if an exception occurred
         conn.rollback()
         cursor.close()
@@ -29,7 +32,7 @@ def delete_from_splits(conn, idx):
         conn.commit()
         cursor.close()
     except Exception as e:
-        print("An error occurred:",idx)
+        logging.error("An error occurred:"+idx)
         # Rollback the changes if an exception occurred
         conn.rollback()
         cursor.close()
@@ -53,7 +56,8 @@ def update_all_duplicate_splits(conn, duplicate_list):
             conn.commit()
         cursor.close()
     except Exception as e:
-        print("An error occurred:", str(e), " Old:", old," New:", new)
+        logging.error("An error occurred:", str(e)," Old:" + old," New:"+ new)
+
         # Rollback the changes if an exception occurred
         conn.rollback()
         cursor.close()
@@ -69,7 +73,7 @@ def remove_all_duplicate_ids(conn, duplicate_list):
         conn.commit()
         cursor.close()
     except Exception as e:
-        print("An error occurred:", str(e))
+        logging.error("An error occurred:", str(e))
         # Rollback the changes if an exception occurred
         conn.rollback()
         cursor.close()
@@ -84,7 +88,7 @@ def convert_names_to_upper_case(conn, name_list):
             cursor.execute(query)
             conn.commit()
     except Exception as e:
-        print("An error occurred:", str(e))
+        logging.error("An error occurred:", str(e))
         # Rollback the changes if an exception occurred
         conn.rollback()
         assert False
@@ -98,7 +102,8 @@ def update_finish_time(conn, invalid_list):
             cursor.execute(query)
         conn.commit()
     except Exception as e:
-        print("An error occurred:", str(e))
+        logging.error("An error occurred:", str(e))
+
         # Rollback the changes if an exception occurred
         conn.rollback()
         assert False
@@ -119,7 +124,7 @@ def update_invalid_finishtime(conn):
         invalid_list[key]=td_text
     cursor.close();
     update_finish_time(conn, invalid_list)
-    print(" Invalid Count:",len(invalid_list))
+    logging.info("Invalid Count:"+str(len(invalid_list)))
     return
 
     
@@ -140,19 +145,19 @@ def cout_unique_names(conn):
             duplicate_list[idx]=old_idx
 
     cursor.close()
-    print("Updating duplicate ids")
+    logging.info("Updating duplicate ids")
     #update_all_duplicate_ids(conn, duplicate_list)
-    print("Removing duplicate splits")
+    logging.info("Removing duplicate splits")
     update_all_duplicate_splits(conn, duplicate_list)
-    print("Removing duplicate ids")    
+    logging.info("Removing duplicate ids")    
     remove_all_duplicate_ids(conn, duplicate_list)
     convert_names_to_upper_case(conn, name_dict)
-    print("Total Number of Unique names:", len(name_dict))
-    print("Total Number of Duplicate names:", len(duplicate_list))
+    logging.info("Total Number of Unique names:"+ str(len(name_dict)))
+    logging.info("Total Number of Duplicate names:"+ str(len(duplicate_list)))
     return
 
 conn = sqlite3.connect('data/RunningData.db')
 update_invalid_finishtime(conn)
 conn.close()
 
-print("Successfully Coverted");
+logging.info("succesfully converted")
