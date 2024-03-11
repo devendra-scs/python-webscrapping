@@ -86,8 +86,7 @@ class DatabaseUtil:
 
         sql = "INSERT INTO EventData ( BIB, RunnersID, EventID, FinishTime, GunTime, OverallRank, GenderRank, Distance, Category, CategoryRank,ResultURL ) VALUES ('"+str(BIB)+ "','"+str(runners_id)+"','"+str(event_id)+"','"+ str(NetTime)+"','"+ str(GunTime)+"','"+ str(OverallRank)+"','"+ str(GenderRank)+"','"+str(Distance)+"', '"+str(Category)+"','"+str(CategoryRank)+"','"+str(url)+"')"
         #print("SQL",sql)
-        self.conn.execute(sql);
-        self.conn.commit()
+        self.conn.execute(sql);        
         return 1;
 
     #   update row in database
