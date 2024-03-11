@@ -14,8 +14,15 @@ from bs4 import BeautifulSoup
 import urllib3
 from db.dbutil import DatabaseUtil
 from concurrent.futures import ThreadPoolExecutor
+from datetime import datetime
 
-logging.basicConfig(level=logging.DEBUG, format='%(asctime)s - %(levelname)s - %(message)s',filename="webscrapping.log",filemode='w')
+now = datetime.now()
+
+current_time = now.strftime("%Y_%H_%M_%S")
+
+LOGFILE_NAME = "webscrapping"+current_time+ ".log"
+print(LOGFILE_NAME)
+logging.basicConfig(level=logging.DEBUG, format='%(asctime)s - %(levelname)s - %(message)s',filename=LOGFILE_NAME,filemode='w')
 
 #<BEGIN Modify>
 #Change below paramenter
