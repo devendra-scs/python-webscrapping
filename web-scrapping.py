@@ -30,8 +30,8 @@ EVENT_NAME="Karnataka State Police Golden Jubliee Run 2024"
 EVENT_CITY="Bangalore"
 EVENT_DATE="MARCH 10, 2024"
 EVENT_YEAR="2024"
-START_BIB_NUMBER=15314
-END_BIB_NUMBER=15315
+START_BIB_NUMBER=10000
+END_BIB_NUMBER=30000
 BASE_URL ='https://www.sportstimingsolutions.in/share.php?event_id=79089&bib='
 #<END Modify>
 
@@ -132,7 +132,7 @@ def process_bib(bibNumber):
     resultURL = BASE_URL + str(bibNumber)
     logging.info(" Fetching details of BIB:"+resultURL)
     if bibNumber % 100 == 0:
-        logging.info(" Fetching details of BIB:"+ bibNumber)
+        logging.info(" Fetching details of BIB:"+ str(bibNumber))
     try:
         result = http.request('GET', resultURL)
         html = result.data
@@ -143,10 +143,8 @@ def process_bib(bibNumber):
         logging.error("Error occurred during HTTP request:", str(e))
     return True
 
-with ThreadPoolExecutor(max_workers=5) as executor:
-    bibNumbers = range(START_BIB_NUMBER, END_BIB_NUMBER)
-    executor.map(process_bib, bibNumbers)
-    logging.info("Thread pool completed succesfully")
-
-
+idx = START_BIB_NUMBER;
+while idx < END_BIB_NUMBER:
+    process_bib(idx)
+    idx = idx+1
 logging.info("completed succesfully")
