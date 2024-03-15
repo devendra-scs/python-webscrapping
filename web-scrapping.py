@@ -31,11 +31,10 @@ EVENT_CITY="Bangalore"
 EVENT_DATE="MARCH 10, 2024"
 EVENT_YEAR="2024"
 START_BIB_NUMBER=10000
-END_BIB_NUMBER=30000
+END_BIB_NUMBER=10050
 BASE_URL ='https://www.sportstimingsolutions.in/share.php?event_id=79089&bib='
 #<END Modify>
 
-http = urllib3.PoolManager(cert_reqs='CERT_NONE')
 urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 dbutil = DatabaseUtil()
 event_id = dbutil.insert_event_details(EVENT_NAME, EVENT_CITY, EVENT_DATE, EVENT_YEAR,BASE_URL)
@@ -134,6 +133,7 @@ def process_bib(bibNumber):
     if bibNumber % 100 == 0:
         logging.info(" Fetching details of BIB:"+ str(bibNumber))
     try:
+        http = urllib3.PoolManager(cert_reqs='CERT_NONE')
         result = http.request('GET', resultURL)
         html = result.data
         if result.status == 200:
@@ -143,8 +143,14 @@ def process_bib(bibNumber):
         logging.error("Error occurred during HTTP request:", str(e))
     return True
 
-idx = START_BIB_NUMBER;
-while idx < END_BIB_NUMBER:
-    process_bib(idx)
-    idx = idx+1
+# create a thread pool of 5 threads
+executor = ThreadPoolExecutor(5)
+# start the load operations and mark each future with the URL
+futures = [executor.submit(process_bib, bib) for bib in range(START_BIB_NUMBER, END_BIB_NUMBER)]
+logging.info("All threads started")
+# wait for them to complete
+for future in futures:
+    future.result()
+logging.info("All threads completed")
+
 logging.info("completed succesfully")

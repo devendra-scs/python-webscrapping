@@ -13,13 +13,14 @@ __status__ = "Production"
 
 from bs4 import BeautifulSoup
 import sqlite3
+from sqlite3worker import Sqlite3Worker
 
 DB_FILE_PATH="data/RunningData.db"
 
 class DatabaseUtil:
     type ='DBUtil'
     def __init__(self):
-        self.conn = sqlite3.connect(DB_FILE_PATH, check_same_thread=False)
+        self.conn = Sqlite3Worker(DB_FILE_PATH)
         self.conn_active = True
     def __del__(self):
         self.conn.close()
@@ -86,7 +87,7 @@ class DatabaseUtil:
 
         sql = "INSERT INTO EventData ( BIB, RunnersID, EventID, FinishTime, GunTime, OverallRank, GenderRank, Distance, Category, CategoryRank,ResultURL ) VALUES ('"+str(BIB)+ "','"+str(runners_id)+"','"+str(event_id)+"','"+ str(NetTime)+"','"+ str(GunTime)+"','"+ str(OverallRank)+"','"+ str(GenderRank)+"','"+str(Distance)+"', '"+str(Category)+"','"+str(CategoryRank)+"','"+str(url)+"')"
         #print("SQL",sql)
-        self.conn.execute(sql);        
+        self.conn.execute(sql);
         return 1;
 
     #   update row in database
