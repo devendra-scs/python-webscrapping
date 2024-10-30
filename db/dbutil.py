@@ -42,8 +42,7 @@ class DatabaseUtil:
             return EventID
 
         sql="INSERT INTO EventDetails(EventName, EventCity, EventDate, EventURL, EventYear) VALUES('"+event_name.upper()+"','"+event_city+"','"+event_date+"','"+base_url+"','"+event_year+"')"
-        self.conn.execute(sql);
-        self.conn.commit()
+        self.conn.execute(sql);       
         EventID=self.get_event_ID( event_name, event_city, event_year);
 
         return EventID;
@@ -63,8 +62,7 @@ class DatabaseUtil:
             return runners_id
         sql="INSERT INTO RunnersDetails (Name, Gender) VALUES ( '"+name.upper()+"', '"+gender+"')";
         #print(sql)
-        self.conn.execute(sql);
-        self.conn.commit()
+        self.conn.execute(sql);        
         runners_id=self.get_runners_ID(name, gender);
         return runners_id;
 
@@ -97,7 +95,7 @@ class DatabaseUtil:
         #print("SQL",sql)
 
         self.conn.execute(sql);
-        self.conn.commit()
+        
         return 1;
 
     def get_event_all_record_list(self, event_id):
@@ -118,7 +116,7 @@ class DatabaseUtil:
         sql="INSERT INTO SplitsDetails(EventID, RunnersID, BIB, Distance, Time) VALUES('"+str(event_id)+"','"+str(runners_id)+"','"+str(BIB)+"','"+str(Distance)+"','"+str(Time)+"')"
         #print("Spilits Insert SQL:",sql)
         self.conn.execute(sql)
-        self.conn.commit()
+        
         return True
 
     def Get_splits_data(self, event_id, runners_id, BIB, Distance):

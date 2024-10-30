@@ -26,13 +26,13 @@ logging.basicConfig(level=logging.DEBUG, format='%(asctime)s - %(levelname)s - %
 
 #<BEGIN Modify>
 #Change below paramenter
-EVENT_NAME="Karnataka State Police Golden Jubliee Run 2024"
+EVENT_NAME="Wipro Bengaluru Marathon 2024"
 EVENT_CITY="Bangalore"
-EVENT_DATE="MARCH 10, 2024"
+EVENT_DATE="October 6, 2024"
 EVENT_YEAR="2024"
-START_BIB_NUMBER=10000
-END_BIB_NUMBER=10050
-BASE_URL ='https://www.sportstimingsolutions.in/share.php?event_id=79089&bib='
+START_BIB_NUMBER=40001
+END_BIB_NUMBER=50000
+BASE_URL ='https://www.sportstimingsolutions.in/share.php?event_id=82858&bib='
 #<END Modify>
 
 urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
