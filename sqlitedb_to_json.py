@@ -1,33 +1,60 @@
-import csv
 import sqlite3
+import json
 import logging
 
-logging.basicConfig(level=logging.DEBUG, format='%(asctime)s - %(levelname)s - %(message)s',filename="sqlitedbtojson.log",filemode='w')
+# Configure logging
+logging.basicConfig(
+    level=logging.DEBUG,
+    format="%(asctime)s - %(levelname)s - %(message)s",
+    filename="sqlitedbtojson.log",
+    filemode="w"
+)
 
-#Script to covert sqlite to csv
-OUTPUT_FILE_NAME="Consolidate-Report.csv"
+# Constants
+DB_FILE = "data/RunningData.db"
+OUTPUT_JSON_FILE = "Consolidate-Report.json"
 
-def writeCSVRow(csvWriter, row):
-    csvWriter.writerow(row)
-    return
+QUERY = """
+SELECT BIB, RD.name, EVD.EventYear, Distance, FinishTime, Pace, OverallRank, 
+       GenderRank, Category, CategoryRank, EVD.EventCity, EVD.EventName, ED.RESULTURL
+FROM EventData ED
+JOIN RunnersDetails RD ON ED.RunnersID = RD.ID
+JOIN EventDetails EVD ON EVD.ID = ED.EventID
+"""
 
-def covert_sqlite_to_csv(soup, csvWriter, row):
-    query= "SELECT  BIB, RD.name, EVD.EventYear, Distance, FinishTime, Pace, OverallRank, GenderRank, Category, CategoryRank, EVD.EventCity, EVD.EventName, ED.RESULTURL FROM EventData ED,RunnersDetails RD, EventDetails EVD  WHERE ED.RunnersID=RD.ID  AND EVD.ID=ED.EventID"
-    row.clear()
-    cursor = conn.execute(query)
-    for row in cursor:
-        writeCSVRow(csvWriter, row)
+def fetch_data(db_path):
+    """Fetch data from SQLite database."""
+    try:
+        with sqlite3.connect(db_path) as conn:
+            conn.row_factory = sqlite3.Row  # Allows fetching rows as dictionaries
+            cursor = conn.execute(QUERY)
+            data = [dict(row) for row in cursor.fetchall()]
+            logging.info("Successfully fetched data from database.")
+            return data
+    except sqlite3.Error as e:
+        logging.error(f"SQLite error: {e}")
+    except Exception as e:
+        logging.error(f"Unexpected error: {e}")
+    return []
 
-    return
+def save_json(data, output_file):
+    """Save data to a JSON file."""
+    try:
+        with open(output_file, "w", encoding="utf-8") as json_file:
+            json.dump(data, json_file, ensure_ascii=False, indent=4)
+        logging.info("Successfully saved data to JSON file.")
+    except IOError as e:
+        logging.error(f"File error: {e}")
+    except Exception as e:
+        logging.error(f"Unexpected error while saving JSON: {e}")
 
-csvFile= open(OUTPUT_FILE_NAME,  'w', newline='') 
-count=0
+def main():
+    """Main function to execute the script."""
+    data = fetch_data(DB_FILE)
+    if data:
+        save_json(data, OUTPUT_JSON_FILE)
+    else:
+        logging.warning("No data found in the database.")
 
-row=[ 'BIB Number', 'Name', 'Year','Distance','Finished Time', 'PACE(min/km)', 'Overall Rank', 'Category', 'Category Rank', 'Gender Rank', 'City', 'EventName', 'ResultURL']
-csvWriter = csv.writer(csvFile)
-writeCSVRow(csvWriter, row)
-conn = sqlite3.connect('data/RunningData.db')
-covert_sqlite_to_csv(conn,csvWriter,row)
-conn.close()
-csvFile.close()
-logging.info("succesfully converted")
+if __name__ == "__main__":
+    main()
